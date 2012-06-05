@@ -1,6 +1,6 @@
 # Memrise
 
-TODO: Write a gem description
+Memrise (www.memrise.com) API wrapper.
 
 ## Installation
 
@@ -19,6 +19,10 @@ Or install it yourself as:
 ## Usage
 
 TODO: Write usage instructions here
+
+    require 'memrise'
+
+    Memrise.new
 
 ## Contributing
 
