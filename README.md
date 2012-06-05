@@ -1,4 +1,4 @@
-# Memrise
+# Memrise [![Build Status](http://travis-ci.org/doriath/memrise.png)](http://travis-ci.org/doriath/memrise)
 
 Memrise (www.memrise.com) API wrapper.
 
