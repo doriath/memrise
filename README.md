@@ -18,11 +18,23 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Sample script (that is using aspell) to check the spelling of all words in given course.
 
     require 'memrise'
+    require 'raspell'
 
-    Memrise.new
+    memrise = Memrise.new
+    course = memrise.find_iset('technical-english-380-words')
+    items = memrise.get_items_for(course.id)
+
+    speller = Aspell.new('en_GB')
+    items.each do |item|
+      item.word.gsub(/[\w\']+/).each do |word|
+        if not speller.check(word)
+          p item
+        end
+      end
+    end
 
 ## Contributing
 

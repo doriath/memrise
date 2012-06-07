@@ -57,10 +57,22 @@ describe Memrise do
 
       items = memrise.get_items_for('10020337')
       items.should have(2).items
-      items[0].word == 'zastapic'
-      items[0].definition == 'supersede'
-      items[1].word == 'budzet'
-      items[1].definition == 'budget'
+      items[0].word.should == 'supersede'
+      items[0].definition.should == 'zastapic'
+      items[1].word.should == 'budget'
+      items[1].definition.should == 'budzet'
+    end
+
+    it 'should handle pagination' do
+      fetcher.should_receive(:fetch).
+        with('http://www.memrise.com/api/1.0/itemiset/?format=json&iset=10020337').
+        and_return('{"meta": {"limit": 20, "next": "/api/1.0/itemiset/?format=json&limit=20&offset=20", "offset": 0, "previous": null, "total_count": 100}, "objects": [{"cre": "2012-04-03T09:44:25", "id": "2216100", "iset": "/api/1.0/iset/10020337/", "item": {"author": "/api/1.0/user/347943/", "cre": "2012-04-03T09:44:24", "defn": "zastapic", "gender": null, "id": "1425747", "moderation_dt": null, "moderation_status": null, "moderation_user": null, "part_of_speech": null, "pronunciation": null, "resource_uri": "/api/1.0/item/1425747/", "special_properties": null, "word": "supersede"}, "order": 2.0, "resource_uri": "/api/1.0/itemiset/2216100/"}, {"cre": "2012-04-03T09:56:15", "id": "2216236", "iset": "/api/1.0/iset/10020337/", "item": {"author": "/api/1.0/user/273973/", "cre": "2012-03-15T11:13:02", "defn": "budzet", "gender": null, "id": "1297386", "moderation_dt": null, "moderation_status": null, "moderation_user": null, "part_of_speech": null, "pronunciation": null, "resource_uri": "/api/1.0/item/1297386/", "special_properties": null, "word": "budget"}, "order": 3.0, "resource_uri": "/api/1.0/itemiset/2216236/"}]}')
+      fetcher.should_receive(:fetch).
+        with('http://www.memrise.com/api/1.0/itemiset/?format=json&limit=100&iset=10020337').
+        and_return('{"meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 40}, "objects": [{"cre": "2012-04-03T09:44:25", "id": "2216100", "iset": "/api/1.0/iset/10020337/", "item": {"author": "/api/1.0/user/347943/", "cre": "2012-04-03T09:44:24", "defn": "zastapic", "gender": null, "id": "1425747", "moderation_dt": null, "moderation_status": null, "moderation_user": null, "part_of_speech": null, "pronunciation": null, "resource_uri": "/api/1.0/item/1425747/", "special_properties": null, "word": "supersede"}, "order": 2.0, "resource_uri": "/api/1.0/itemiset/2216100/"}, {"cre": "2012-04-03T09:56:15", "id": "2216236", "iset": "/api/1.0/iset/10020337/", "item": {"author": "/api/1.0/user/273973/", "cre": "2012-03-15T11:13:02", "defn": "budzet", "gender": null, "id": "1297386", "moderation_dt": null, "moderation_status": null, "moderation_user": null, "part_of_speech": null, "pronunciation": null, "resource_uri": "/api/1.0/item/1297386/", "special_properties": null, "word": "budget"}, "order": 3.0, "resource_uri": "/api/1.0/itemiset/2216236/"}]}')
+
+      items = memrise.get_items_for('10020337')
+      items.should have(2).items
     end
   end
 end

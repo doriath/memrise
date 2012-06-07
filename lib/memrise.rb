@@ -2,46 +2,64 @@ require "memrise/version"
 require 'memrise/user'
 require 'memrise/iset'
 require 'memrise/item'
+require 'memrise/fetcher'
 require 'json'
 
 class Memrise
-  def initialize(fetcher)
+  def initialize(fetcher = Fetcher.new)
     @fetcher = fetcher
   end
 
   # If user with specified name exists, it returns it; otherwise returns nil
   def find_user(username)
-    body = @fetcher.fetch("http://www.memrise.com/api/1.0/user/?format=json&username=#{username}")
-    json = JSON.parse(body)
+    objects = fetch_objects '/api/1.0/user/', username: username
 
-    return nil if json["objects"].empty?
-
-    User.new.tap do |user|
-      user.id = json["objects"][0]["id"]
-      user.username = json["objects"][0]["username"]
-    end
+    objects.map do |object|
+      User.new.tap do |user|
+        user.id = object["id"]
+        user.username = object["username"]
+      end
+    end.first
   end
 
   def find_iset(slug)
-    body = @fetcher.fetch("http://www.memrise.com/api/1.0/iset/?format=json&slug=#{slug}")
-    json = JSON.parse(body)
+    objects = fetch_objects '/api/1.0/iset/', slug: slug
 
-    return nil if json["objects"].empty?
-
-    Iset.new.tap do |iset|
-      iset.id = json["objects"][0]["id"]
-    end
+    objects.map do |object|
+      Iset.new.tap do |iset|
+        iset.id = object["id"]
+      end
+    end.first
   end
 
   def get_items_for(iset_id)
-    body = @fetcher.fetch("http://www.memrise.com/api/1.0/itemiset/?format=json&iset=#{iset_id}")
-    json = JSON.parse(body)
+    objects = fetch_objects '/api/1.0/itemiset/', iset: iset_id
 
-    json["objects"].map do |object|
+    objects.map do |object|
       Item.new.tap do |item|
-        item.word = object["word"]
-        item.definition = object["definition"]
+        item.word = object["item"]["word"]
+        item.definition = object["item"]["defn"]
       end
     end
+  end
+
+  private
+
+  def fetch_objects resource_uri, options
+    options = {format: 'json'}.merge(options)
+    url = "http://www.memrise.com" + resource_uri + "?" + parameterize(options)
+
+    json = JSON.parse(@fetcher.fetch(url))
+    unless json['meta']['next'].nil?
+      options = {format: 'json', limit: json['meta']['total_count']}.merge(options)
+      url = "http://www.memrise.com" + resource_uri + "?" + parameterize(options)
+      json = JSON.parse(@fetcher.fetch(url))
+    end
+
+    json['objects']
+  end
+
+  def parameterize(params)
+    URI.escape(params.collect{|k,v| "#{k}=#{v}"}.join('&'))
   end
 end
